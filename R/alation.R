@@ -213,6 +213,82 @@ getQuery <- function(id)
   r
 }
 
+
+#' Get table from Alation
+#'
+#' @param id Alation Query ID
+#' @return The query as a character object
+#' @examples
+#' \dontrun{
+#' sql <- getQuery(123456)
+#' }
+#'
+getSchema <- function(id)
+{
+  if(id == "" ) {
+    stop("A valid Alation query id is required")
+  }
+  if (id != as.integer(id))
+  {
+    stop("The query_id must be an integer")
+  }
+  
+  if (!require("RCurl",quietly = TRUE)) {
+    stop("RCurl package required to connect to Alation.", call. = FALSE)
+  }
+  
+  path <- path.package("alation")
+  f <- paste(path,"/.token",sep="")
+  
+  if(!file.exists(f)) {
+    stop("You need an Alation token before calling getQuery() - see getToken() for details.")
+  }
+  load(f)
+  
+  header <- basicTextGatherer()
+  u <- paste(url, "/api/schema/",id,"/sql/",sep="")
+  opts <- list(httpheader="Content-Type: application/json", httpheader=paste("token: ",token,sep=""), ssl.verifypeer = FALSE)
+  r <- getURL(u,.opts=opts, headerfunction = header$update)    
+  h <- parseHTTPHeader( header$value() )
+  if (! ( h["status"] >= 200 && h["status"] < 300 ) ) {
+      stop(paste("HTTP error : ", h["status"]," ",h["statusMessage"],". Check the query_id is valid.",sep=""))
+  }
+  r
+}
+
+getTable <- function(id)
+{
+  if(id == "" ) {
+    stop("A valid Alation query id is required")
+  }
+  if (id != as.integer(id))
+  {
+    stop("The query_id must be an integer")
+  }
+  
+  if (!require("RCurl",quietly = TRUE)) {
+    stop("RCurl package required to connect to Alation.", call. = FALSE)
+  }
+  
+  path <- path.package("alation")
+  f <- paste(path,"/.token",sep="")
+  
+  if(!file.exists(f)) {
+    stop("You need an Alation token before calling getQuery() - see getToken() for details.")
+  }
+  load(f)
+  
+  header <- basicTextGatherer()
+  u <- paste(url, "/api/table/",id,"/sql/",sep="")
+  opts <- list(httpheader="Content-Type: application/json", httpheader=paste("token: ",token,sep=""), ssl.verifypeer = FALSE)
+  r <- getURL(u,.opts=opts, headerfunction = header$update)    
+  h <- parseHTTPHeader( header$value() )
+  if (! ( h["status"] >= 200 && h["status"] < 300 ) ) {
+      stop(paste("HTTP error : ", h["status"]," ",h["statusMessage"],". Check the query_id is valid.",sep=""))
+  }
+  r
+}
+
 #' Get result from Alation
 #'
 #' @param id Alation Result ID
